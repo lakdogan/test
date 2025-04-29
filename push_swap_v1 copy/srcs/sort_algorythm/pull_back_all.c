@@ -6,7 +6,7 @@
 /*   By: lakdogan <lakdogan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/27 16:34:47 by lakdogan          #+#    #+#             */
-/*   Updated: 2025/04/29 20:34:39 by lakdogan         ###   ########.fr       */
+/*   Updated: 2025/04/29 20:41:01 by lakdogan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,8 +107,13 @@ void sort_optimal(t_data *data)
             fprintf(stderr, "[DEBUG] -> rotate_a\n");
             rotate_a(data);
         } else {
-            fprintf(stderr, "[DEBUG] -> push_b (rank=%d)\n", data->b[data->top_b+1][RANK]);
-            push_b(data);
+            /* Vor dem push nur ankündigen … */
+fprintf(stderr, "  -> push_b\n");
+push_b(data);
+/* … und danach, wenn der Eintrag existiert, kannst du ihn loggen: */
+fprintf(stderr, "     new B-top rank = %d\n",
+        data->b[data->top_b + 1][RANK]);
+
         }
         i++;
     }

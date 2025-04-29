@@ -6,7 +6,7 @@
 /*   By: lakdogan <lakdogan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/23 21:52:27 by lakdogan          #+#    #+#             */
-/*   Updated: 2025/04/29 20:12:29 by lakdogan         ###   ########.fr       */
+/*   Updated: 2025/04/29 20:55:02 by lakdogan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,7 +211,7 @@ void		allocate_int(t_data *data);
 
 double		ft_sqrt(double x, double epsilon);
 
-void	assign_chunk_id(t_data *data);
+
 void	chunk_assign(t_data *data);
 void	find_chunk_size(t_data *data);
 void	push_chunks(t_data *data);
@@ -224,3 +224,5 @@ void smart_rotate(t_data *d, int ra_needed, int rb_needed);
 void calibrate_chunks(t_data *d);
 
 void sort_optimal(t_data *data);
+void    assign_chunk_id(t_data *d);
+void    find_chunk_size(t_data *d);
