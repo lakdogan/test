@@ -6,11 +6,12 @@
 /*   By: lakdogan <lakdogan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/23 21:52:27 by lakdogan          #+#    #+#             */
-/*   Updated: 2025/04/29 20:55:02 by lakdogan         ###   ########.fr       */
+/*   Updated: 2025/04/29 22:24:53 by lakdogan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../libft/inc/libft.h"
+#include "./utils.h"
 
 #define FALSE 0
 #define TRUE 1
@@ -52,6 +53,7 @@
 
 #define NORMAL 0
 #define REVERSE 1
+
 
 typedef struct s_v
 {
@@ -226,3 +228,11 @@ void calibrate_chunks(t_data *d);
 void sort_optimal(t_data *data);
 void    assign_chunk_id(t_data *d);
 void    find_chunk_size(t_data *d);
+void    greedy_merge(t_data *d);
+
+int	ft_max(int a, int b);
+int	ft_min(int a, int b);
+int first_idx_b(t_data *d);
+int first_idx_a(t_data *d);
+void    rotate_sorted_stack(t_data *data);
+void	rotate_min_to_top(t_data *d);

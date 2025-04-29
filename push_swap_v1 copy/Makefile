@@ -6,7 +6,7 @@
 #    By: lakdogan <lakdogan@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/26 00:23:28 by lakdogan          #+#    #+#              #
-#    Updated: 2025/04/29 18:35:17 by lakdogan         ###   ########.fr        #
+#    Updated: 2025/04/29 21:30:56 by lakdogan         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -66,6 +66,8 @@ PUSH_SWAP_MANDATORY_FILES := \
 				$(UTILS_DIR)check_flag_print_op.c \
 				$(UTILS_DIR)ft_sqrt.c \
 				$(UTILS_DIR)chunk_utils.c \
+				$(UTILS_DIR)utils.c \
+				$(UTILS_DIR)stack_utils.c \
 				$(SWAP_DIR)swap_a.c \
 				$(SWAP_DIR)swap_b.c \
 				$(SWAP_DIR)swap_both.c \
@@ -84,6 +86,7 @@ PUSH_SWAP_MANDATORY_FILES := \
 				$(SORT_ALGORYTHM_DIR)push_chunks.c \
 				$(SORT_ALGORYTHM_DIR)pull_back_all.c \
 				$(SORT_ALGORYTHM_DIR)mini_sort.c \
+				$(SORT_ALGORYTHM_DIR)smart_rotations.c \
 				$(STATISTICS_DIR)check_ascending_order.c \
 				$(STATISTICS_DIR)check_descending_order.c \
 				$(STATISTICS_DIR)statistics.c \

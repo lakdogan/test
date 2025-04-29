@@ -6,154 +6,236 @@
 /*   By: lakdogan <lakdogan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/27 16:34:47 by lakdogan          #+#    #+#             */
-/*   Updated: 2025/04/29 20:41:01 by lakdogan         ###   ########.fr       */
+/*   Updated: 2025/04/29 23:04:55 by lakdogan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./../../inc/push_swap.h"
 
-void	pull_back_all(t_data *d)
+/* ------------------------------------------------------------------
+   In A bleibt (L)IS – der Rest wird nach B gedrückt
+   ------------------------------------------------------------------ */
+void	sort_optimal(t_data *d)
 {
-	d->target = d->numcount;
-	while (d->target >= 1)
-	{
-		d->pbacnt = ft_count_current_numcount(d->b, d->numcount);
-		if (d->pbacnt == 0)
-			break ;
-		d->pbaidx = 0;
-		while (d->pbaidx < d->pbacnt && d->b[d->top_b + 1
-				+ d->pbaidx][RANK] != d->target)
-			++d->pbaidx;
-		if (d->pbaidx >= d->pbacnt)
-			continue ;
-		if (d->pbaidx <= d->pbacnt / 2)
-			while (d->pbaidx-- > 0)
-				rotate_b(d);
-		else
-		{
-			d->pbasteps = d->pbacnt - d->pbaidx;
-			while (d->pbasteps-- > 0)
-				reverse_rotate_b(d);
-		}
-		push_a(d);
-		--d->target;
-	}
-}
+    int	i;
+    int	lds_len;
+    int	use_lis;
+    int	lis_len;
+    static int asc_store[1000]; /* 1000 > numcount */
 
-void sort_optimal(t_data *data)
-{
-    int i;
-    int lis, lds;
-    int use_lis;
-    int total;
-    int len_a, len_b;
-    int *asc_flags;
-    int guard;
-
-	init_top_b(data);
-
-    // Initialer Status
-    len_a = ft_count_current_numcount(data->a, data->numcount);
-    len_b = ft_count_current_numcount(data->b, data->numcount);
-    fprintf(stderr, "[DEBUG] Enter sort_optimal_debug: top_a=%d, top_b=%d, lenA=%d, lenB=%d\n",
-            data->top_a, data->top_b, len_a, len_b);
-
-    // 1) ASC-Flags
-    check_ascending_order(data);
-    lis = data->len_out;
-    fprintf(stderr, "[DEBUG] LIS length = %d\n", lis);
-
-    // Speicher ASC-Flags
-    asc_flags = malloc(len_a * sizeof(int));
-    for (i = 0; i < len_a; ++i) {
-        asc_flags[i] = data->a[data->top_a + i][IN_ORDER_ASC];
-        fprintf(stderr, "[DEBUG] asc_flags[%d]=%d (rank=%d)\n", i,
-                asc_flags[i], data->a[data->top_a + i][RANK]);
-    }
-
-    // 1b) LDS-Flags
-    check_descending_order(data);
-    lds = data->len_out;
-    fprintf(stderr, "[DEBUG] LDS length = %d\n", lds);
-
-    // 2) Wahl
-    use_lis = (lis >= lds ? data->true : data->false);
-    fprintf(stderr, "[DEBUG] use_lis = %d\n", use_lis);
-
-    // 2b) Finale Flags setzen
-    for (i = 0; i < len_a; ++i) {
-        if (use_lis == data->true)
-            data->a[data->top_a + i][IN_ORDER_ASC] = asc_flags[i];
-        else
-            data->a[data->top_a + i][IN_ORDER_ASC] =
-                data->a[data->top_a + i][IN_ORDER_DES];
-        fprintf(stderr, "[DEBUG] final flag[%d]=%d\n", i,
-                data->a[data->top_a + i][IN_ORDER_ASC]);
-    }
-    free(asc_flags);
-
-	init_top_b(data);
-    // 3) Push non-(L)IS nach B mit Guard
-    total = ft_count_current_numcount(data->a, data->numcount);
-    fprintf(stderr, "[DEBUG] push phase: total=%d\n", total);
-    guard = total + 5;
+    /* ---------- 1. Flags berechnen ---------- */
+    check_ascending_order(d); /* setzt IN_ORDER_ASC   */
+    lis_len = d->len_out;       /* merkt LIS-Länge      */
+    /* Zwischenspeichern der Ascending-Flags */
     i = 0;
-    while (i < total && guard-- > 0) {
-        int flag = data->a[data->top_a][IN_ORDER_ASC];
-        int val  = data->a[data->top_a][VALUE];
-        fprintf(stderr, "[DEBUG] iter %d: top_a=%d flag=%d val=%d guard=%d\n",
-                i, data->top_a, flag, val, guard);
-        if (flag == data->true) {
-            fprintf(stderr, "[DEBUG] -> rotate_a\n");
-            rotate_a(data);
-        } else {
-            /* Vor dem push nur ankündigen … */
-fprintf(stderr, "  -> push_b\n");
-push_b(data);
-/* … und danach, wenn der Eintrag existiert, kannst du ihn loggen: */
-fprintf(stderr, "     new B-top rank = %d\n",
-        data->b[data->top_b + 1][RANK]);
-
-        }
-        i++;
+    while (i < d->numcount)
+    {
+        asc_store[i] = d->a[i][IN_ORDER_ASC];
+        ++i;
     }
-    if (guard <= 0)
-        fprintf(stderr, "[DEBUG] push phase guard exhausted\n");
-
-    // 4) Pull-Phase debug
-    len_b = ft_count_current_numcount(data->b, data->numcount);
-    fprintf(stderr, "[DEBUG] pull phase start: lenB=%d\n", len_b);
-    guard = len_b * 2 + 5;
-    while (ft_count_current_numcount(data->b, data->numcount) > 0 && guard-- > 0) {
-        int cnt = ft_count_current_numcount(data->b, data->numcount);
-        int target = data->numcount;
-        int idx = 0;
-        // Suche nächstes
-        while (idx < cnt && data->b[data->top_b+1+idx][RANK] != target)
-            ++idx;
-        fprintf(stderr, "[DEBUG] pull loop: cnt=%d idx=%d guard=%d\n",
-                cnt, idx, guard);
-        if (idx >= cnt) {
-            fprintf(stderr, "[DEBUG] pull: target not at top, decrement target\n");
-            target--;
-            continue;
-        }
-        if (idx <= cnt/2) {
-            fprintf(stderr, "[DEBUG] rotate_b %d times\n", idx);
-            while (idx-- > 0) rotate_b(data);
-        } else {
-            int steps = cnt - idx;
-            fprintf(stderr, "[DEBUG] reverse_rotate_b %d times\n", steps);
-            while (steps-- > 0) reverse_rotate_b(data);
-        }
-        fprintf(stderr, "[DEBUG] push_a (target)\n");
-        push_a(data);
+    check_descending_order(d); /* setzt IN_ORDER_DES   */
+    lds_len = d->len_out;
+    /* ---------- 2. Besseres Muster auswählen ---------- */
+    use_lis = (lis_len >= lds_len) ? d->true : d->false;
+    i = 0;
+    while (i < d->numcount)
+    {
+        if (use_lis)
+            d->a[i][IN_ORDER_ASC] = asc_store[i];
+        else
+            d->a[i][IN_ORDER_ASC] = d->a[i][IN_ORDER_DES];
+        ++i;
     }
-    if (guard <= 0)
-        fprintf(stderr, "[DEBUG] pull phase guard exhausted\n");
-
-    fprintf(stderr, "[DEBUG] exit sort_optimal_debug: top_a=%d top_b=%d\n",
-            data->top_a, data->top_b);
+    /* ---------- 3. Nicht-(L)IS nach B schieben ---------- */
+    while (ft_count_current_numcount(d->a, d->numcount) > lis_len)
+    {
+        if (d->a[d->top_a][IN_ORDER_ASC] == d->true)
+            rotate_a(d);
+        else
+            push_b(d);
+    }
+    /* ---------- 4. Alles aus B geordnet zurück ---------- */
 }
 
+/* ------------------------------------------------------------------
+   Hilfs-Funktion: Bestimme Position in A, wo 'rank' eingefügt wird.
+   Indexierung wird als zyklisch betrachtet.
+   ------------------------------------------------------------------ */
+static int	place_in_a(t_data *d, int rank)
+{
+    int	len;
+    int	base;
+    int	min_r, max_r;
+    int	min_i, max_i;
+    int	r;
+    int	cur;
+    int	nxt;
 
+    len = ft_count_current_numcount(d->a, d->numcount);
+    base = d->top_a;
+    min_r = d->a[base][RANK];
+    max_r = min_r;
+    min_i = 0;
+    max_i = 0;
+    for (int i = 1; i < len; ++i)
+    {
+        r = d->a[(base + i) % d->numcount][RANK];
+        if (r < min_r)
+        {
+            min_r = r;
+            min_i = i;
+        }
+        if (r > max_r)
+        {
+            max_r = r;
+            max_i = i;
+        }
+    }
+    /* 1) Wrap-around Fälle */
+    if (rank < min_r)
+        return (min_i);
+    if (rank > max_r)
+        return ((max_i + 1) % len);
+    /* 2) Normale Lücke */
+    for (int i = 0; i < len - 1; ++i)
+    {
+        cur = d->a[(base + i) % d->numcount][RANK];
+        nxt = d->a[(base + i + 1) % d->numcount][RANK];
+        if (cur < rank && rank < nxt)
+            return (i + 1);
+    }
+    /* 3) Fallback */
+    return (len);
+}
+
+/* ------------------------------------------------------------------
+   Kosten für EIN Element oben in B berechnen – eval_move
+   ------------------------------------------------------------------ */
+typedef struct s_move
+{
+    int	ra, rb, rra, rrb, cost;
+}			t_move;
+
+static void	eval_move(t_data *d, int idx_in_b, t_move *m)
+{
+    int	len_b;
+    int	len_a;
+    int	rank;
+    int	pos_a;
+    int	v1, v2, v3, v4;
+
+    len_b = ft_count_current_numcount(d->b, d->numcount);
+    len_a = ft_count_current_numcount(d->a, d->numcount);
+    rank = d->b[(first_idx_b(d) + idx_in_b) % d->numcount][RANK];
+    /* Rotationen in B */
+    m->rb = idx_in_b;
+    m->rrb = len_b - idx_in_b;
+    /* Einfüge-Position in A */
+    pos_a = place_in_a(d, rank);
+    m->ra = pos_a;
+    m->rra = len_a - pos_a;
+    /* Vergleiche verschiedene Kombinationen */
+    v1 = ft_max(m->ra, m->rb);
+    v2 = ft_max(m->rra, m->rrb);
+    v3 = m->ra + m->rrb;
+    v4 = m->rra + m->rb;
+    m->cost = ft_min(ft_min(v1, v2), ft_min(v3, v4));
+}
+
+/* ------------------------------------------------------------------
+   Günstigstes Element aus B in A einfügen – apply_move
+   ------------------------------------------------------------------ */
+static void	apply_move(t_data *d, t_move m)
+{
+    if (m.cost == ft_max(m.ra, m.rb))
+        smart_rotate(d, m.ra, m.rb);
+    else if (m.cost == ft_max(m.rra, m.rrb))
+        smart_reverse_rotate(d, m.rra, m.rrb);
+    else if (m.cost == m.ra + m.rrb)
+    {
+        smart_rotate(d, m.ra, 0);
+        smart_reverse_rotate(d, 0, m.rrb);
+    }
+    else
+    {
+        smart_reverse_rotate(d, m.rra, 0);
+        smart_rotate(d, 0, m.rb);
+    }
+    push_a(d);
+}
+
+/* ------------------------------------------------------------------
+   Greedy merge: Elemente von B werden eins nach dem anderen korrekt in A eingefügt.
+   Die Rotationen in B erfolgen explizit.
+   ------------------------------------------------------------------ */
+void	greedy_merge(t_data *d)
+{
+    int		len_b;
+    int		best_idx;
+    int		i, k;
+    t_move	best_move, cur;
+
+    while (ft_count_current_numcount(d->b, d->numcount) > 0)
+    {
+        len_b = ft_count_current_numcount(d->b, d->numcount);
+        best_idx = 0;
+        eval_move(d, 0, &best_move);
+        for (i = 1; i < len_b; ++i)
+        {
+            eval_move(d, i, &cur);
+            if (cur.cost < best_move.cost)
+            {
+                best_move = cur;
+                best_idx = i;
+            }
+        }
+        /* Rotationen in B: best_idx-mal im günstigsten Weg */
+        if (best_idx <= len_b / 2)
+        {
+            for (i = 0; i < best_idx; i++)
+                rotate_b(d);
+        }
+        else
+        {
+            k = len_b - best_idx;
+            for (i = 0; i < k; i++)
+                reverse_rotate_b(d);
+        }
+        apply_move(d, best_move);
+    }
+    if (!check_for_sorted(d))
+        rotate_sorted_stack(d);
+    rotate_min_to_top(d);
+}
+
+/* ------------------------------------------------------------------
+   Dreht A so, dass das Minimum (kleinstes RANK) oben ist.
+   ------------------------------------------------------------------ */
+void	rotate_min_to_top(t_data *d)
+{
+    int	len;
+    int	idx;
+    int	k;
+    int	base;
+
+    len = ft_count_current_numcount(d->a, d->numcount);
+    base = d->top_a;
+    idx = 0;
+    /* Suche nach dem Element mit RANK == 1 */
+    while (idx < len && d->a[(base + idx) % d->numcount][RANK] != 1)
+        ++idx;
+    if (idx == len)
+        return ;
+    /* Wähle die kostengünstige Richtung zum Rotieren */
+    if (idx <= len / 2)
+    {
+        for (int i = 0; i < idx; i++)
+            rotate_a(d);
+    }
+    else
+    {
+        k = len - idx;
+        for (int i = 0; i < k; i++)
+            reverse_rotate_a(d);
+    }
+}

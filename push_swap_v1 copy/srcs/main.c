@@ -6,7 +6,7 @@
 /*   By: lakdogan <lakdogan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/23 21:52:05 by lakdogan          #+#    #+#             */
-/*   Updated: 2025/04/29 20:50:21 by lakdogan         ###   ########.fr       */
+/*   Updated: 2025/04/29 22:42:47 by lakdogan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,22 +198,15 @@ int	main(int argc, char **argv)
 			{
 				data.top_a = 0;
 				init_top_b(&data);
-				fprintf(stderr, "SANITY: top_a=%d lenA=%d top_b=%d lenB=%d\n",
-					data.top_a, ft_count_current_numcount(data.a,
-						data.numcount), data.top_b,
-					ft_count_current_numcount(data.b, data.numcount));
-				/* 1)  erste Chunk-Zuordnung (für LIS/LDS) */
-				assign_chunk_id(&data);
-				/* 2)  LIS/LDS-Phase → verschiebt einen Großteil nach B */
-				/*   1)  LIS / LDS   ---------------------------------------- */
-				sort_optimal(&data); /* legt schon vieles nach B     */
-				/*   2)  Chunks für den Rest in A  --------------------------- */
-				assign_chunk_id(&data); /* *** jetzt ohne Crash ***     */
-				/*   3)  nur ausführen, wenn es wirklich Chunks gibt          */
-				if (data.chunk_count > 1) /* 1 Chunk ⇒ nichts zu tun      */
-					push_chunks(&data);
-				/*   4)  alles aus B zurück holen ---------------------------- */
-				pull_back_all(&data);
+				assign_chunk_id(&data); /* 1) Chunk-Infos für sort_optimal  */
+				sort_optimal(&data);    /* 2) LIS/LDS-Phase                 */
+				/* =========== 3) PUSH-CHUNKS  (optional)  =========== */
+				/* push_chunks(&data); */
+				/* =========== 4) GREEDY-MERGE  ======================= */
+				greedy_merge(&data); /* statt pull_back_all()          */
+				/* =========== 5) Min nach oben  ====================== */
+				rotate_min_to_top(&data);
+	
 			}
 		}
 	}
