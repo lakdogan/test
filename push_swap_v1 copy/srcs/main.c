@@ -6,7 +6,7 @@
 /*   By: lakdogan <lakdogan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/23 21:52:05 by lakdogan          #+#    #+#             */
-/*   Updated: 2025/04/29 20:21:49 by lakdogan         ###   ########.fr       */
+/*   Updated: 2025/04/29 20:28:16 by lakdogan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,9 +196,13 @@ int	main(int argc, char **argv)
 			}
 			else
 			{
-				assign_chunk_id(&data);
-				push_chunks(&data);
-				pull_back_all(&data);
+				        /* 1) Chunk-IDs vergeben */
+						assign_chunk_id(&data);
+						/* 2) Stack-A resetten und B initialisieren */
+						data.top_a = 0;
+						init_top_b(&data);
+						/* 3) Hybrides Sortieren: LIS/LDS-Extraktion + Pull-Phase */
+						sort_optimal(&data);
 			}
 		}
 	}
